@@ -14,6 +14,7 @@ namespace Platformer.Mechanics
     {
         public PatrolPath path;
         public AudioClip ouch;
+        [SerializeField] float attackTimer;
 
         internal PatrolPath.Mover mover;
         internal AnimationController control;
@@ -22,6 +23,8 @@ namespace Platformer.Mechanics
         SpriteRenderer spriteRenderer;
 
         public Bounds Bounds => _collider.bounds;
+        public GameObject blaster;
+        public Transform blasterSpawner;
 
         void Awake()
         {
@@ -29,6 +32,7 @@ namespace Platformer.Mechanics
             _collider = GetComponent<Collider2D>();
             _audio = GetComponent<AudioSource>();
             spriteRenderer = GetComponent<SpriteRenderer>();
+            attackTimer = 0f;
         }
 
         void OnCollisionEnter2D(Collision2D collision)
@@ -44,10 +48,18 @@ namespace Platformer.Mechanics
 
         void Update()
         {
+            attackTimer += Time.deltaTime;
+            if (attackTimer >= 6)
+            {
+                Instantiate(blaster, blasterSpawner.position, Quaternion.identity);
+                attackTimer = 0;
+            }
+            
             if (path != null)
             {
                 if (mover == null) mover = path.CreateMover(control.maxSpeed * 0.5f);
                 control.move.x = Mathf.Clamp(mover.Position.x - transform.position.x, -1, 1);
+
             }
         }
 
